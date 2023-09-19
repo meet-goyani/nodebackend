@@ -1,17 +1,25 @@
 const getError = require("../middleware/errorhandle");
 const Contact = require("../models/contactModel");
-const getAllContact = (req, res, next) => {
-  res.status(200).json({ messege: `Get all contacts` });
+
+// Get all contacts API
+const getAllContact = async (req, res, next) => {
+  try {
+    const contacts = await Contact.find({});
+    res
+      .status(200)
+      .json({ status: 200, messege: `Get all contacts`, contacts });
+  } catch (error) {
+    res.status(400).json({
+      status: 400,
+      message: "Opp sorry.. couldn't find the record!",
+      contacts: [],
+    });
+  }
 };
 
+// Create contact API
 const createContact = async (req, res, next) => {
   // console.log("create contact:", req.body);
-  // const { email, phone } = req.body;
-  // if (!email || !phone) {
-  //   res.status(400);
-  //   throw new Error("All fileds are mandatory");
-  // }
-
   try {
     const { name, email, phone } = req.body;
     // const contact = await Contact.create(req.body);
@@ -24,6 +32,7 @@ const createContact = async (req, res, next) => {
     if (!phone) {
       return res.status(400).json(getError(400, "Phone is required!"));
     }
+
     const existingEmail = await Contact.findOne({ email });
     if (existingEmail) {
       return res
@@ -36,6 +45,7 @@ const createContact = async (req, res, next) => {
       email,
       phone,
     });
+
     const contact = await newContact.save();
     res.status(201).json({
       status: 201,
@@ -49,15 +59,50 @@ const createContact = async (req, res, next) => {
   res.status(201).json({ message: "Contact created successfully!" });
 };
 
-const getContactById = (req, res) => {
-  res.status(200).json({ message: `Get user for ${req.params.id}` });
+// Get contact by id API
+const getContactById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const getContact = await Contact.findById(id);
+    res
+      .status(200)
+      .json({ status: 200, message: `Get contact successfull!`, getContact });
+  } catch (error) {
+    res.status(400).json({
+      status: 400,
+      message: "Opp sorry.. couldn't find the record!",
+      contacts: [],
+    });
+  }
 };
 
+// Update contact API
 const updateContact = (req, res) => {
   res.status(200).json({ message: `Update user for ${req.params.id}` });
 };
 
-const deleteContact = (req, res) => {
+// Delete Contact API
+const deleteContact = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleteCon = await Contact.findByIdAndDelete(id);
+    if (!deleteCon) {
+      return res
+        .status(404)
+        .json({ status: 404, message: "Cannot find contact ID" });
+    }
+    res.status(200).json({
+      status: 200,
+      message: "Contact has been deleted successfully!",
+      deleteCon,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: 400,
+      message: "Opp Sorry.. Couldn't delete this record!",
+      contacts: [],
+    });
+  }
   res.status(200).json({ message: `Delete User for ${req.params.id}` });
 };
 
