@@ -49,14 +49,13 @@ const createContact = async (req, res, next) => {
     const contact = await newContact.save();
     res.status(201).json({
       status: 201,
-      message: "Created successfully!",
+      message: "Conact has been created successfully!",
       contact: contact,
     });
   } catch (error) {
     console.log(error);
     res.status(400).json({ message: error.message });
   }
-  res.status(201).json({ message: "Contact created successfully!" });
 };
 
 // Get contact by id API
